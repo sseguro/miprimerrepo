@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Webgaze - Gazeplot</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Gazeplot de sesion</h1>
+    <a href="#" id="backLink">&larr; Volver al experimento</a>
+  </header>
+  <main>
+    <div class="card">
+      <p class="badge" id="meta"></p>
+      <canvas id="plot"></canvas>
+    </div>
+  </main>
+
+  <script>
+    const sessionId = new URLSearchParams(location.search).get("id");
+
+    function draw(session) {
+      const canvas = document.getElementById("plot");
+      const maxWidth = 900;
+      const scale = Math.min(1, maxWidth / (session.pageWidth || maxWidth));
+      canvas.width = (session.pageWidth || maxWidth) * scale;
+      canvas.height = (session.pageHeight || 600) * scale;
+      const ctx = canvas.getContext("2d");
+
+      // Clics: marcas discretas de color ambar
+      ctx.fillStyle = "#f59e0b";
+      session.clicks.forEach((c) => {
+        ctx.beginPath();
+        ctx.arc(c.x * scale, c.y * scale, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Sacadicos: lineas entre fijaciones consecutivas, en orden
+      ctx.strokeStyle = "rgba(96, 165, 250, 0.6)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      session.fixations.forEach((f, i) => {
+        const x = f.x * scale, y = f.y * scale;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Fijaciones: circulos numerados, radio proporcional a la duracion
+      session.fixations.forEach((f) => {
+        const x = f.x * scale, y = f.y * scale;
+        const radius = Math.max(8, Math.min(28, Math.sqrt(f.durationMs) * 1.4));
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(239, 68, 68, 0.55)";
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ef4444";
+        ctx.stroke();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(f.order, x, y);
+      });
+    }
+
+    async function load() {
+      const res = await fetch(`/api/sessions/${sessionId}`);
+      const session = await res.json();
+      document.getElementById("backLink").href = `experiment.html?id=${session.experimentId}`;
+      document.getElementById("meta").textContent =
+        `Participante ${session.participantId.slice(0, 8)} | ` +
+        `${session.fixations.length} fijaciones | ${session.clicks.length} clics | ` +
+        `${session.endedAt ? new Date(session.endedAt).toLocaleString() : "sesion en curso"}`;
+      draw(session);
+    }
+
+    load();
+  </script>
+</body>
+</html>
