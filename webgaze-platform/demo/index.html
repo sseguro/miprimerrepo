@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Web de prueba - Webgaze</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 60px auto; line-height: 1.6; }
+    button { padding: 10px 16px; margin-top: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Pagina de ejemplo para probar el eyetracker</h1>
+  <p>Este es contenido de prueba para simular una web real donde se ejecuta el experimento.
+     Lee este parrafo, luego mira el titulo de arriba, y despues haz clic en el boton de abajo.</p>
+  <p>Segundo parrafo con mas texto de relleno para tener varios puntos de interes en la pagina
+     y poder observar el recorrido de la mirada entre ellos.</p>
+  <button onclick="alert('Clic registrado')">Haz clic aqui</button>
+
+  <!--
+    Reemplaza REPLACE_WITH_EXPERIMENT_ID por el id que te da el dashboard
+    al crear un experimento (http://localhost:3000/dashboard/index.html)
+  -->
+  <script src="/tracker.js" data-experiment-id="REPLACE_WITH_EXPERIMENT_ID"></script>
+</body>
+</html>

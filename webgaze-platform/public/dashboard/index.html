@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Webgaze - Experimentos</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Webgaze Research</h1>
+  </header>
+  <main>
+    <div class="card">
+      <h2>Nuevo experimento</h2>
+      <label for="name">Nombre</label>
+      <input id="name" placeholder="Ej. Rediseno de checkout" />
+      <label for="targetUrl">URL objetivo (opcional, solo referencia)</label>
+      <input id="targetUrl" placeholder="https://mi-web.com/checkout" />
+      <button class="btn" id="createBtn">Crear experimento</button>
+    </div>
+
+    <div class="card">
+      <h2>Experimentos</h2>
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>Sesiones</th><th>Creado</th></tr>
+        </thead>
+        <tbody id="experimentsBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    async function loadExperiments() {
+      const res = await fetch("/api/experiments");
+      const experiments = await res.json();
+      const tbody = document.getElementById("experimentsBody");
+      tbody.innerHTML = experiments.map((e) => `
+        <tr>
+          <td><a class="row-link" href="experiment.html?id=${e.id}">${e.name}</a></td>
+          <td>${e.sessionCount}</td>
+          <td class="badge">${new Date(e.createdAt).toLocaleString()}</td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("createBtn").addEventListener("click", async () => {
+      const name = document.getElementById("name").value.trim();
+      const targetUrl = document.getElementById("targetUrl").value.trim();
+      if (!name) return alert("El nombre es obligatorio");
+
+      const res = await fetch("/api/experiments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, targetUrl }),
+      });
+      const experiment = await res.json();
+      const snippet = `<script src="${location.origin}/tracker.js" data-experiment-id="${experiment.id}"><\/script>`;
+      alert("Experimento creado. Pega este snippet en la web a testear:\n\n" + snippet);
+      loadExperiments();
+    });
+
+    loadExperiments();
+  </script>
+</body>
+</html>

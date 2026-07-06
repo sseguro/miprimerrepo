@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Webgaze - Experimento</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <h1 id="title">Experimento</h1>
+    <a href="index.html">&larr; Volver</a>
+  </header>
+  <main>
+    <div class="card">
+      <h2>Snippet de instalacion</h2>
+      <pre class="snippet" id="snippet"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Sesiones</h2>
+      <table>
+        <thead>
+          <tr><th>Participante</th><th>Inicio</th><th>Fin</th><th>Fijaciones</th><th>Clics</th></tr>
+        </thead>
+        <tbody id="sessionsBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const id = new URLSearchParams(location.search).get("id");
+
+    async function load() {
+      const res = await fetch(`/api/experiments/${id}`);
+      const experiment = await res.json();
+      document.getElementById("title").textContent = experiment.name;
+      document.getElementById("snippet").textContent =
+        `<script src="${location.origin}/tracker.js" data-experiment-id="${experiment.id}"><\/script>`;
+
+      document.getElementById("sessionsBody").innerHTML = experiment.sessions.map((s) => `
+        <tr>
+          <td><a class="row-link" href="session.html?id=${s.id}">${s.participantId.slice(0, 8)}</a></td>
+          <td class="badge">${new Date(s.startedAt).toLocaleString()}</td>
+          <td class="badge">${s.endedAt ? new Date(s.endedAt).toLocaleString() : "en curso"}</td>
+          <td>${s.fixationCount}</td>
+          <td>${s.clickCount}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="5" class="badge">Todavia no hay sesiones registradas</td></tr>`;
+    }
+
+    load();
+  </script>
+</body>
+</html>

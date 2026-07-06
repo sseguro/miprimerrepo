@@ -1,0 +1,14 @@
+{
+  "name": "webgaze-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma para que equipos de research corran experimentos de eye tracking sobre paginas web",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test server/fixations.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
